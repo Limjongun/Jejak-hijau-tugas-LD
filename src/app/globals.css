@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Palet Anti-Slop: Kertas Daur Ulang, Tinta, Pasir, Hutan, Tanah Liat */
+  --background: #f4f1e8;
+  --foreground: #1b1f1a;
+
+  --card: #fbf9f3;
+  --card-foreground: #1b1f1a;
+
+  --popover: #fbf9f3;
+  --popover-foreground: #1b1f1a;
+
+  --primary: #1f3d2b;
+  --primary-hover: #162e20;
+  --primary-foreground: #f4f1e8;
+
+  --secondary: #e9e4d6;
+  --secondary-foreground: #1f3d2b;
+
+  --muted: #ebe6d9;
+  --muted-foreground: #5b6358;
+
+  --accent: #c2562e;
+  --accent-foreground: #ffffff;
+
+  --border: #ddd6c6;
+  --input: #ddd6c6;
+  --ring: #1f3d2b;
+
+  --radius: 8px;
+
+  --eco-stamp-bg: #ece7da;
+  --eco-stamp-text: #1f3d2b;
+  --eco-stamp-border: #cfc6b2;
+}
+
+.dark {
+  /* Dark Mode: Muted Evergreen Slate & Paper Ivory */
+  --background: #111612;
+  --foreground: #ede9df;
+
+  --card: #18201a;
+  --card-foreground: #ede9df;
+
+  --popover: #1c261f;
+  --popover-foreground: #ede9df;
+
+  --primary: #3e7d4f;
+  --primary-hover: #326740;
+  --primary-foreground: #ffffff;
+
+  --secondary: #222d25;
+  --secondary-foreground: #cfdbc9;
+
+  --muted: #1e2720;
+  --muted-foreground: #9ca497;
+
+  --accent: #d66a42;
+  --accent-foreground: #ffffff;
+
+  --border: #28332a;
+  --input: #28332a;
+  --ring: #3e7d4f;
+
+  --eco-stamp-bg: #1c261f;
+  --eco-stamp-text: #98c7a3;
+  --eco-stamp-border: #2d3e31;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tipografi & Heading: Tegas, tanpa gradien, letter-spacing rapi */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--foreground);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  line-height: 1.2;
+}
+
+/* Angka tabular untuk harga dan data */
+.tabular-numbers,
+.price-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Panel solid bersih (bukan glassmorphism AI) */
+.clean-panel {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+}
+
+/* Floating shadow hanya untuk modal / popover */
+.shadow-elevated {
+  box-shadow: 0 1px 2px rgba(27, 31, 26, 0.06), 0 8px 24px rgba(27, 31, 26, 0.08);
+}
+
+.dark .shadow-elevated {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Scrollbar bersih bernuansa kertas */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}

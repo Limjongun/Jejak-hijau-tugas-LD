@@ -1,0 +1,229 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  phone         String?
+  role          String    @default("CUSTOMER") // "CUSTOMER" | "ADMIN"
+  isBlocked     Boolean   @default(false)
+  totalCo2Kg    Float     @default(0)
+  totalPlastic  Int       @default(0)
+  ecoPoints     Int       @default(100)
+  createdAt     DateTime  @default(now())
+
+  addresses     Address[]
+  orders        Order[]
+  reviews       Review[]
+  points        EcoPointTransaction[]
+  badges        UserBadge[]
+  donations     TreeDonation[]
+}
+
+model Address {
+  id          String   @id @default(cuid())
+  userId      String
+  label       String   // "Rumah", "Kantor"
+  recipient   String
+  phone       String
+  province    String
+  city        String
+  cityId      String?
+  district    String
+  postalCode  String
+  detail      String
+  isDefault   Boolean  @default(false)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  icon        String?
+  products    Product[]
+}
+
+model Sdg {
+  id          Int          @id
+  name        String
+  description String?
+  color       String
+  products    ProductSdg[]
+}
+
+model Product {
+  id              String         @id @default(cuid())
+  name            String
+  slug            String         @unique
+  sku             String         @unique
+  description     String
+  price           Int            // Rupiah
+  stock           Int
+  weightGram      Int            @default(500)
+  status          String         @default("ACTIVE") // "ACTIVE", "DRAFT", "ARCHIVED"
+  isFeatured      Boolean        @default(false)
+  co2SavedKg      Float          @default(0)
+  plasticSavedPcs Int            @default(0)
+  impactNote      String?
+  origin          String?
+  materials       String?
+  avgRating       Float          @default(0)
+  soldCount       Int            @default(0)
+  categoryId      String
+  category        Category       @relation(fields: [categoryId], references: [id])
+  images          ProductImage[]
+  sdgs            ProductSdg[]
+  reviews         Review[]
+  orderItems      OrderItem[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  url       String
+  order     Int     @default(0)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model ProductSdg {
+  productId String
+  sdgId     Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sdg       Sdg     @relation(fields: [sdgId], references: [id])
+
+  @@id([productId, sdgId])
+}
+
+model Order {
+  id               String               @id @default(cuid())
+  orderNumber      String               @unique // JH-20261029-0001
+  userId           String
+  status           String               @default("PAID") // "PENDING_PAYMENT", "PAID", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"
+  subtotal         Int
+  shippingCost     Int                  @default(0)
+  discount         Int                  @default(0)
+  pointsUsed       Int                  @default(0)
+  pointsEarned     Int                  @default(0)
+  total            Int
+  courier          String
+  courierService   String               @default("Standard")
+  isGreenDelivery  Boolean              @default(false)
+  plasticFreePack  Boolean              @default(false)
+  trackingNumber   String?
+  customerName     String?
+  customerEmail    String?
+  customerPhone    String?
+  shippingAddress  String?
+  destLatitude     Float?
+  destLongitude    Float?
+  deliveryDistanceKm Float?
+  totalCo2Kg       Float                @default(0)
+  totalPlastic     Int                  @default(0)
+  paymentMethod    String?              @default("QRIS Simulator")
+  paymentStatus    String               @default("SUCCESS")
+  createdAt        DateTime             @default(now())
+
+  user             User                 @relation(fields: [userId], references: [id])
+  items            OrderItem[]
+  history          OrderStatusHistory[]
+}
+
+model OrderItem {
+  id              String  @id @default(cuid())
+  orderId         String
+  productId       String
+  productName     String
+  productImage    String?
+  price           Int
+  quantity        Int
+  co2SavedKg      Float   @default(0)
+  plasticSavedPcs Int     @default(0)
+
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product @relation(fields: [productId], references: [id])
+}
+
+model OrderStatusHistory {
+  id        String   @id @default(cuid())
+  orderId   String
+  status    String
+  note      String?
+  changedBy String?  // "ADMIN", "SYSTEM", "CUSTOMER"
+  createdAt DateTime @default(now())
+
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  rating    Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model EcoPointTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "EARN", "REDEEM_DISCOUNT", "REDEEM_TREE", "REFUND"
+  amount    Int      // + atau -
+  refId     String?
+  note      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Badge {
+  id             String      @id @default(cuid())
+  code           String      @unique
+  name           String
+  description    String
+  icon           String?
+  requiredMetric String?
+  users          UserBadge[]
+}
+
+model UserBadge {
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  badge    Badge    @relation(fields: [badgeId], references: [id])
+
+  @@id([userId, badgeId])
+}
+
+model TreeDonation {
+  id             String    @id @default(cuid())
+  userId         String
+  treeType       String    @default("Trembesi")
+  quantity       Int       @default(1)
+  source         String    @default("POINTS")
+  status         String    @default("PENDING") // "PENDING", "PLANTED"
+  location       String?
+  gpsCoordinates String?
+  proofImage     String?
+  plantedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  user           User      @relation(fields: [userId], references: [id])
+}

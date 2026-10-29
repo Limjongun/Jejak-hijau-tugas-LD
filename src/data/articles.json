@@ -1,0 +1,117 @@
+[
+  {
+    "id": "art-1",
+    "slug": "5-langkah-sederhana-mengurangi-emisi-karbon-rumah-tangga",
+    "title": "5 Langkah Sederhana Mengurangi Emisi Karbon Rumah Tangga",
+    "excerpt": "Dari penggunaan smart plug hingga pengaturan suhu pendingin ruangan, inilah cara mudah memangkas jejak karbon bulanan Anda hingga 30%.",
+    "category": "Gaya Hidup",
+    "readTime": "4 menit baca",
+    "date": "24 Okt 2026",
+    "author": "Dr. Sarah Paramita",
+    "authorRole": "Peneliti Konsumsi Berkelanjutan & Energi Rumah Tangga",
+    "image": "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80",
+    "tags": ["SDG 13", "Gaya Hidup Hijau", "Efisiensi Energi", "Rumah Tangga"],
+    "co2PotentialReduction": "120 kg CO₂e / bulan",
+    "content": [
+      {
+        "heading": "1. Putus 'Vampire Power' dengan Pengatur Daya Pintar",
+        "body": "Peralatan elektronik dalam kondisi standby menyumbang hingga 10% dari total tagihan listrik bulanan rumah tangga di Indonesia. Fenomena yang dikenal sebagai arus bocor atau vampire power ini dapat dipangkas seketika menggunakan Smart Plug yang secara otomatis memutus daya listrik ketika perangkat seperti televisi, charger laptop, atau konsol game tidak digunakan."
+      },
+      {
+        "heading": "2. Atur Suhu Pendingin Ruangan (AC) pada 24°C–25°C",
+        "body": "Setiap penurunan suhu AC sebesar 1°C di bawah 24°C meningkatkan konsumsi energi kompresor pendingin hingga 6-8%. Menjaga suhu ruangan pada 24°C dengan kipas angin pendukung adalah formula terbaik untuk kenyamanan termal optimal tanpa membebani pembangkit listrik batubara."
+      },
+      {
+        "heading": "3. Terapkan Prinsip 'Cook Smart' dan Kelola Makanan",
+        "body": "Sisa makanan yang terbuang ke tempat pembuangan akhir (TPA) terurai secara anaerob dan melepaskan gas metana—gas rumah kaca yang 28 kali lebih merusak daripada karbon dioksida. Mengompos sisa sayuran rumahan dengan metode Takakura sederhana dapat mengubah potensi limbah berbahaya menjadi pupuk organik kaya hara."
+      },
+      {
+        "heading": "4. Beralih ke Kemasan Ulang dan Hindari Kantong Sekali Pakai",
+        "body": "Membawa tas kanvas belanja lipat dan tumbler minum sendiri setiap hari mengurangi jejak karbon produksi plastik sintetis hingga 45 kg per orang setiap tahunnya. Langkah kecil ini juga mendukung target bebas sampah plastik nasional."
+      },
+      {
+        "heading": "5. Gunakan Penerangan LED Tenaga Surya untuk Area Luar",
+        "body": "Lampu teras, taman, dan pagar yang menyala sepanjang malam dapat digantikan sepenuhnya oleh lampu solar cell panel terpadu. Pengisian energi matahari di siang hari menyalakan lampu otomatis di malam hari tanpa menarik satu watt pun dari jaringan listrik PLN."
+      }
+    ],
+    "relatedProductSlugs": [
+      "smart-plug-penghemat-listrik",
+      "lampu-taman-led-solar-set-4",
+      "komposter-takakura-rumahan"
+    ]
+  },
+  {
+    "id": "art-2",
+    "slug": "mengenal-perbedaan-bahan-plastik-vs-bioplastik",
+    "title": "Mengenal Perbedaan Bahan Plastik vs Bioplastik & Ramah Lingkungan",
+    "excerpt": "Apakah semua kantong berlabel biodegradable benar-benar terurai di alam? Pahami perbedaan dan solusinya bagi konsumen bijak.",
+    "category": "Zero Waste",
+    "readTime": "6 menit baca",
+    "date": "18 Okt 2026",
+    "author": "Budi Hartono, M.Sc",
+    "authorRole": "Praktisi Sirkular Ekonomi & Material Hijau",
+    "image": "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?auto=format&fit=crop&w=1200&q=80",
+    "tags": ["SDG 12", "Zero Waste", "Bioplastik", "Eko Konsumsi"],
+    "co2PotentialReduction": "35 kg CO₂e / orang / tahun",
+    "content": [
+      {
+        "heading": "Ilusi Label 'Biodegradable' pada Plastik Konvensional",
+        "body": "Banyak produk di pasaran mengklaim ramah lingkungan hanya karena menyertakan zat aditif oxo-biodegradable. Padahal, plastik jenis ini tidak benar-benar terurai menjadi senyawa organik, melainkan hanya terfragmentasi menjadi mikroplastik beracun yang mengkontaminasi rantai makanan perairan laut dan air tanah."
+      },
+      {
+        "heading": "Apa Itu Bioplastik Sejati (PLA dan Pati Singkong)?",
+        "body": "Bioplastik berbasis biomassa sejati terbuat dari pati singkong, jagung, atau tebu (PLA - Polylactic Acid). Material ini membutuhkan kondisi komposting industri (suhu di atas 55°C dengan kelembapan tertentu) untuk terurai sempurna dalam kurun waktu 90 hingga 180 hari tanpa meninggalkan racun mikroplastik."
+      },
+      {
+        "heading": "Material Alami Terbaik Pengganti Wadah Plastik",
+        "body": "Bagi konsumen harian, alternatif paling aman dan berkelanjutan adalah material alami murni: Beeswax wrap dari lilin lebah organik untuk pembungkus makanan segar, sikat berbahan bambu hutan lestari, dan tumbler baja tahan karat (stainless steel food grade) yang dapat digunakan berulang hingga ribuan kali pemakaian."
+      },
+      {
+        "heading": "Panduan Cerdas Memilah Sebelum Membeli",
+        "body": "Prioritaskan produk dengan kemasan nol plastik (naked packaging), atau produk yang dikemas dalam karton daur ulang bersegel nabati. Di JejakHijau, seluruh paket pesanan wajib melewati kurasi ketat bebas dari selotip berbahan vinil dan bubble wrap polietilena fosil."
+      }
+    ],
+    "relatedProductSlugs": [
+      "beeswax-wrap-paket-3-ukuran",
+      "tumbler-stainless-steel-500ml",
+      "sikat-gigi-bambu-isi-4"
+    ]
+  },
+  {
+    "id": "art-3",
+    "slug": "mengapa-menanam-pohon-trembesi-paling-efektif-serap-karbon",
+    "title": "Mengapa Menanam Pohon Trembesi Paling Efektif Menyerap Karbon?",
+    "excerpt": "Satu pohon trembesi dewasa mampu menyerap hingga 28,5 ton CO₂ per tahun. Inilah alasan JejakHijau memprioritaskan spesies ini.",
+    "category": "Konservasi",
+    "readTime": "5 menit baca",
+    "date": "10 Okt 2026",
+    "author": "Ir. Hendra Wijaya",
+    "authorRole": "Ahli Silvikultur & Restorasi Hutan Tropis",
+    "image": "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80",
+    "tags": ["SDG 15", "Reboisasi", "Pohon Trembesi", "Karbon Offset"],
+    "co2PotentialReduction": "28,5 ton CO₂ / pohon / tahun",
+    "content": [
+      {
+        "heading": "Raksasa Penyerap Karbon dari Tropika",
+        "body": "Berdasarkan riset Fakultas Kehutanan Institut Pertanian Bogor (IPB), pohon trembesi (Samanea saman) diakui sebagai salah satu tanaman dengan kapasitas sekuestrasi (penyerapan) karbon tertinggi di dunia. Tajuk kanopinya yang berbentuk payung raksasa mampu menyerap hingga 28,488 ton CO₂ setiap tahunnya saat mencapai kematangan vegetatif."
+      },
+      {
+        "heading": "Fisiologi Daun dan Mekanisme Stomata",
+        "body": "Pohon trembesi memiliki daun majemuk yang sensitif terhadap intensitas cahaya dan kelembapan. Luas permukaan daun total dari satu pohon trembesi berdiameter kanopi 15 meter dapat mencapai ribuan meter persegi, memaksimalkan laju fotosintesis dan penyimpanan karbon ke dalam biomassa kayu batang, akar, dan tanah."
+      },
+      {
+        "heading": "Menjaga Kualitas Air Tanah dan Menurunkan Suhu Lokal",
+        "body": "Selain penyerapan gas rumah kaca, sistem perakaran trembesi yang dalam dan bercabang luas berperan sebagai spons alami pencegah erosi serta pemurni air tanah. Kanopinya yang teduh mampu menurunkan temperatur udara mikro perkotaan dan koridor jalan hingga 3°C–5°C."
+      },
+      {
+        "heading": "Inisiatif Adopsi Pohon JejakHijau di Tahura Juanda",
+        "body": "Melalui program Eco Points di JejakHijau, setiap transaksi belanja ramah lingkungan menyisihkan kontribusi untuk pembibitan trembesi asli di kawasan lindung Tahura Bandung. Setiap bibit dipasangi tag GPS unik agar kontributor dapat memantau titik koordinat dan pertumbuhan pohon asuh mereka secara transparan."
+      }
+    ],
+    "relatedProductSlugs": [
+      "paket-adopsi-bibit-pohon",
+      "pot-sabut-kelapa-cocopot-isi-3",
+      "starter-kit-hidroponik-rumahan"
+    ]
+  }
+]

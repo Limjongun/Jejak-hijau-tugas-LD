@@ -1,0 +1,436 @@
+================================================================
+ PANDUAN DESAIN UI/UX WEB "ANTI AI SLOP"
+ Karakteristik, style, font, ukuran, warna, layout, dan checklist
+================================================================
+
+Apa itu "AI slop" di UI?
+Tampilan web yang terasa generik, seperti dibuat otomatis tanpa
+keputusan desain: semuanya "rapi" tapi tidak punya karakter, tidak
+punya konteks, dan mirip dengan ribuan web lain.
+
+Prinsip utama anti-slop:
+SETIAP ELEMEN HARUS ADA ALASANNYA. Kalau tidak bisa menjelaskan
+kenapa sebuah warna, font, ikon, atau animasi dipakai, berarti itu
+default, bukan desain.
+
+
+----------------------------------------------------------------
+ 1. CIRI-CIRI AI SLOP (HINDARI)
+----------------------------------------------------------------
+
+VISUAL
+[x] Gradien ungu-biru / ungu-pink di hero, tombol, atau teks
+[x] Teks bergradien (gradient text) di judul
+[x] Glassmorphism (kartu blur transparan) tanpa alasan
+[x] Blob/orb 3D melayang dan efek glow neon di background
+[x] Semua kartu rounded besar (rounded-2xl/3xl) + shadow besar
+[x] Ikon "sparkles" / emoji sebagai ikon fitur (✨🚀💡🔥)
+[x] Ilustrasi orang 3D generik atau foto orang hasil AI
+[x] Dark mode dengan aksen neon tanpa konteks brand
+[x] Bento grid yang isinya cuma ikon + 1 kalimat
+
+LAYOUT
+[x] Pola wajib: hero center → 3 kartu fitur → testimoni → CTA → footer
+[x] Semua section rata tengah (center aligned)
+[x] Jarak antar section sama persis di seluruh halaman
+[x] Badge kecil di atas judul hero ("✨ New: AI-powered ...")
+[x] Angka statistik palsu ("10K+ Users", "99% Satisfaction")
+
+TIPOGRAFI
+[x] Inter / Roboto / Poppins dipakai tanpa pertimbangan
+[x] Judul raksasa tapi isinya kosong
+[x] Terlalu banyak ketebalan font (300, 400, 500, 600, 700, 800 sekaligus)
+[x] Paragraf terlalu lebar (melebihi 80 karakter per baris)
+
+COPYWRITING
+[x] "Revolutionize", "Elevate", "Unlock", "Seamless", "Empower",
+    "Supercharge", "Next-level", "Discover the future of ..."
+[x] Versi Indonesia: "Tingkatkan pengalaman Anda", "Solusi terbaik
+    untuk kebutuhan Anda", "Wujudkan potensi tanpa batas"
+[x] Testimoni palsu dengan nama generik dan foto stok
+[x] Kalimat yang bisa ditempel ke produk apa pun
+
+INTERAKSI
+[x] Semua elemen fade-in saat scroll
+[x] Elemen melayang/bergoyang terus-menerus
+[x] Hover yang membesarkan kartu (scale 1.05) di semua tempat
+
+
+----------------------------------------------------------------
+ 2. TENTUKAN ARAH DESAIN DULU
+----------------------------------------------------------------
+
+Sebelum membuka Figma/kode, tulis 3 hal ini:
+1. Konteks   : produk apa, untuk siapa, dipakai di mana
+               (contoh: e-commerce produk ramah lingkungan untuk
+               anak muda Indonesia, mayoritas dibuka dari HP)
+2. Kata kunci: 3 kata sifat yang spesifik
+               (contoh: "alami, jujur, hangat", BUKAN "modern,
+               clean, minimalis" karena itu default semua orang)
+3. Referensi : ambil dari dunia nyata, bukan dari web lain
+               (contoh: label kemasan kertas daur ulang, buku
+               botani lama, papan nama toko curah, katalog benih)
+
+Arah desain inilah yang menentukan semua pilihan di bawah.
+
+
+----------------------------------------------------------------
+ 3. TIPOGRAFI
+----------------------------------------------------------------
+
+ATURAN UMUM
+- Maksimal 2 keluarga font (1 heading + 1 body). Font ketiga
+  hanya untuk kebutuhan khusus (misal monospace untuk kode/angka).
+- Maksimal 3 ketebalan: Regular 400, Medium 500, Semibold/Bold 600-700.
+- Pilih font yang punya karakter dan cocok dengan kata kunci,
+  bukan sekadar "aman".
+
+CONTOH PASANGAN FONT (semua tersedia di Google Fonts)
+Heading               Body                  Kesan
+------------------    ------------------    ---------------------------
+Fraunces              Instrument Sans       hangat, organik, editorial
+Young Serif           Schibsted Grotesk     klasik, jujur, tegas
+Newsreader            Hanken Grotesk        tenang, seperti majalah
+Bricolage Grotesque   Instrument Sans       playful, berkarakter
+Instrument Serif      Geist                 elegan, kontemporer
+DM Serif Display      Work Sans             tegas, mudah dibaca
+Space Grotesk         IBM Plex Sans         teknis, data-heavy
+
+Catatan: Plus Jakarta Sans, Manrope, Figtree, dan Inter bagus,
+tapi sudah sangat sering dipakai. Kalau tetap dipakai, karakter
+harus datang dari elemen lain (warna, layout, foto).
+
+SKALA UKURAN (rasio 1.25 / Major Third, base 16px)
+Token     Desktop    Mobile    Pemakaian
+-------   --------   -------   ---------------------------------
+xs        12px       12px      caption, label kecil, legal
+sm        14px       14px      meta info, label form, badge
+base      16px       16px      body teks UI, tombol, input
+lg        18px       17px      body untuk artikel / paragraf panjang
+xl        20px       18px      lead paragraph, judul kartu
+2xl       25px       22px      H4
+3xl       31px       26px      H3
+4xl       39px       30px      H2 / judul section
+5xl       49px       36px      H1 halaman
+6xl       61px       40px      H1 hero (opsional, jangan berlebihan)
+
+Gunakan clamp() agar ukuran menyesuaikan layar, contoh:
+  h1 { font-size: clamp(2.25rem, 1.5rem + 3vw, 3.8rem); }
+
+TINGGI BARIS (line-height)
+- Body teks          : 1.5 - 1.65
+- Heading besar      : 1.05 - 1.15
+- Heading kecil      : 1.2 - 1.3
+- Tombol / label     : 1 - 1.2
+
+JARAK HURUF (letter-spacing)
+- Heading besar      : -0.02em s/d -0.03em
+- Heading kecil      : -0.01em
+- Body               : 0 (jangan diubah)
+- Label HURUF KAPITAL: +0.06em s/d +0.1em, ukuran 12-13px
+
+LEBAR BARIS
+- Paragraf: 60-75 karakter (max-width: 65ch)
+- Judul   : pakai text-wrap: balance agar baris tidak timpang
+
+DETAIL YANG MEMBEDAKAN
+- Harga & angka tabel: font-variant-numeric: tabular-nums
+- Format Rupiah konsisten: Rp129.000 (Intl.NumberFormat 'id-ID')
+- Hierarki dibuat dari ukuran + ketebalan + warna, bukan cuma ukuran
+
+
+----------------------------------------------------------------
+ 4. WARNA
+----------------------------------------------------------------
+
+ATURAN UMUM
+- Palet kecil: 1 warna utama, 1 aksen, dan 5-9 tingkat netral.
+- Komposisi 60-30-10: 60% netral (background), 30% warna
+  pendukung, 10% aksen (CTA, harga promo, status penting).
+- Netral diberi sedikit "rasa" (warm/cool tint), jangan abu-abu
+  murni. Hindari #000000 dan #FFFFFF murni untuk area luas.
+- Warna diambil dari referensi nyata (foto daun, kertas kraft,
+  tanah liat), bukan dari preset gradien.
+- Tidak ada gradien kecuali punya fungsi jelas (misal overlay
+  foto agar teks terbaca).
+
+KONTRAS (WCAG)
+- Teks body          : minimal 4.5 : 1
+- Teks besar (>=24px): minimal 3 : 1
+- Komponen UI/ikon   : minimal 3 : 1
+- Jangan mengandalkan warna saja untuk status; tambahkan ikon/teks.
+
+CONTOH PALET (tema e-commerce ramah lingkungan)
+Peran              Nama          Hex
+----------------   -----------   --------
+Background         Kertas        #F4F1E8
+Surface/kartu      Krem terang   #FBF9F3
+Teks utama         Tinta         #1B1F1A
+Teks sekunder      Lumut abu     #5B6358
+Border             Pasir         #DDD6C6
+Primer             Hutan         #1F3D2B
+Primer hover       Hutan gelap   #162E20
+Pendukung          Lumut         #6B8A55
+Aksen (CTA/promo)  Tanah liat    #C2562E
+Sukses             Daun          #3E7D4F
+Peringatan         Kunyit        #C99A1E
+Error              Bata          #A63A2B
+
+
+----------------------------------------------------------------
+ 5. SPACING & LAYOUT
+----------------------------------------------------------------
+
+SKALA SPACING (kelipatan 4/8)
+4 - 8 - 12 - 16 - 24 - 32 - 48 - 64 - 96 - 128 (px)
+Jangan pakai angka acak seperti 13px, 27px, 50px.
+
+PADDING SECTION
+- Desktop: 96-128px atas-bawah
+- Tablet : 72-96px
+- Mobile : 56-72px
+- VARIASIKAN: section penting boleh lebih lega, section
+  pendukung lebih rapat. Ritme yang sama terus terasa robotik.
+
+GRID & CONTAINER
+- Desktop: 12 kolom, gutter 24-32px
+- Tablet : 8 kolom, gutter 24px
+- Mobile : 4 kolom, gutter 16px, margin samping 16-20px
+- Container maksimal 1200-1280px; teks artikel maks 680-720px
+
+BREAKPOINT
+360px (HP kecil) - 768px (tablet) - 1024px (laptop) -
+1280px (desktop) - 1536px (layar lebar)
+
+ANTI-POLA SLOP DI LAYOUT
+- Gunakan rata kiri sebagai default; rata tengah hanya untuk
+  momen tertentu (misal CTA penutup).
+- Gunakan layout asimetris (contoh 7:5 atau 8:4), bukan selalu 6:6.
+- Konten nyata muncul di layar pertama (untuk e-commerce: produk,
+  kategori, atau promo nyata), bukan slogan kosong.
+- Setiap section punya struktur berbeda sesuai isinya.
+- Beri satu "momen" visual yang khas (misal tabel dampak CO2
+  bergaya label kemasan), bukan hiasan di semua tempat.
+
+
+----------------------------------------------------------------
+ 6. KOMPONEN
+----------------------------------------------------------------
+
+BORDER RADIUS (pilih SATU keluarga dan konsisten)
+- Tegas/editorial : 0 - 4px
+- Netral          : 6 - 8px
+- Ramah           : 10 - 12px
+- Pill (999px) hanya untuk chip/tag/badge, bukan semua tombol.
+- Elemen bersarang: radius dalam = radius luar - padding.
+
+BAYANGAN (shadow)
+- Default: tanpa shadow, pakai border 1px warna netral.
+- Shadow hanya untuk elemen yang benar-benar "melayang":
+  dropdown, modal, popover, toast.
+- Contoh shadow halus: 0 1px 2px rgba(27,31,26,.06),
+                       0 8px 24px rgba(27,31,26,.08)
+
+TOMBOL
+- Tinggi        : 40px (kecil), 44-48px (default), 52-56px (besar)
+- Padding X     : 16-24px
+- Font          : 15-16px, weight 500-600
+- Hierarki      : 1 tombol primer per area; sisanya sekunder/teks
+- Label         : kata kerja spesifik ("Tambah ke Keranjang",
+                  "Bayar Rp245.000"), bukan "Submit"/"Klik di sini"
+- Tanpa gradien, tanpa ikon panah di semua tombol
+
+INPUT & FORM
+- Tinggi 44-48px, font minimal 16px (mencegah auto-zoom di iOS)
+- Label selalu di atas input (placeholder bukan pengganti label)
+- Pesan error di bawah field, spesifik dan memberi solusi
+- Satu kolom untuk form di mobile
+
+KARTU PRODUK
+- Rasio gambar konsisten (1:1 atau 4:5)
+- Urutan: gambar → nama → harga → info pendukung (rating/stok)
+- Harga paling menonjol setelah gambar
+- Jangan isi semua kartu dengan badge, ikon, dan tombol sekaligus
+
+TARGET SENTUH
+- Minimal 44 x 44px untuk semua elemen yang bisa diklik di mobile
+
+STATE YANG WAJIB DIDESAIN
+default, hover, focus (terlihat jelas, bukan outline: none),
+active, disabled, loading, error, success, empty state.
+
+
+----------------------------------------------------------------
+ 7. IKON, GAMBAR, ILUSTRASI
+----------------------------------------------------------------
+
+IKON
+- Satu set saja (contoh: Lucide, Phosphor, Tabler)
+- Ukuran 16px (inline), 20px (tombol), 24px (navigasi)
+- Stroke konsisten 1.5px
+- Ikon membantu teks, bukan menggantikan teks
+- Tidak pakai emoji sebagai ikon fitur
+
+FOTO
+- Foto produk asli dengan pencahayaan & latar konsisten
+- Satu gaya foto untuk seluruh web (misal: latar kertas krem,
+  cahaya alami dari samping)
+- Hindari foto stok orang tersenyum ke kamera dan wajah hasil AI
+- Rasio konsisten per konteks: produk 1:1 / 4:5, banner 16:9 / 21:9
+- Format WebP/AVIF, lazy loading, selalu isi alt text
+
+ILUSTRASI
+- Jika dipakai, buat gaya sendiri yang sederhana dan konsisten
+  (misal garis tangan, 1-2 warna dari palet)
+- Lebih baik tanpa ilustrasi daripada ilustrasi 3D generik
+
+
+----------------------------------------------------------------
+ 8. MOTION / ANIMASI
+----------------------------------------------------------------
+
+- Animasi harus punya fungsi: memberi feedback, menunjukkan
+  perubahan, atau mengarahkan perhatian.
+- Durasi:
+    Micro-interaction (hover, toggle) : 120 - 200ms
+    Komponen (dropdown, drawer)       : 200 - 300ms
+    Transisi halaman / modal          : 300 - 400ms
+- Easing: ease-out untuk masuk, ease-in untuk keluar.
+  Contoh: cubic-bezier(0.2, 0.8, 0.2, 1)
+- Animasikan transform & opacity saja (lebih ringan).
+- Hormati prefers-reduced-motion.
+- Contoh animasi yang bermakna: ikon keranjang "bergoyang" kecil
+  saat produk ditambahkan, angka CO2 bertambah saat qty dinaikkan.
+- Hindari: fade-in di setiap section, elemen melayang terus,
+  parallax berlebihan.
+
+
+----------------------------------------------------------------
+ 9. COPYWRITING / MICROCOPY
+----------------------------------------------------------------
+
+- Spesifik dan konkret, bisa diverifikasi.
+    Slop  : "Solusi ramah lingkungan terbaik untuk masa depan."
+    Bagus : "Tumbler 500ml. Satu tumbler menggantikan ±300 botol
+             plastik setahun."
+- Pakai bahasa pengguna, bukan bahasa pemasaran.
+- Judul section menjelaskan isi ("Produk paling banyak dibeli
+  minggu ini"), bukan slogan ("Pilihan Terbaik untuk Anda").
+- Pesan error menjelaskan masalah + cara memperbaiki.
+    Slop  : "Terjadi kesalahan."
+    Bagus : "Kode voucher HIJAU10 sudah kedaluwarsa sejak 20 Okt."
+- Empty state mengarahkan aksi berikutnya.
+    "Keranjangmu masih kosong. Mulai dari produk zero waste di
+     bawah Rp50.000."
+- Konsisten sapaan: pilih "kamu" atau "Anda", jangan campur.
+- Tidak ada testimoni/angka statistik palsu.
+
+
+----------------------------------------------------------------
+ 10. AKSESIBILITAS & PERFORMA
+----------------------------------------------------------------
+
+- HTML semantik: header, nav, main, section, footer, button
+  (bukan div yang diberi onClick)
+- Urutan heading benar: satu H1 per halaman, lalu H2, H3
+- Fokus keyboard terlihat jelas (outline 2px warna kontras)
+- Semua gambar informatif punya alt text
+- Ukuran font body minimal 16px
+- Target Lighthouse: Performance, Accessibility, Best Practices,
+  SEO >= 90
+- Font: maksimal 2 keluarga, pakai font-display: swap,
+  subset latin
+- LCP < 2.5 detik, CLS < 0.1
+
+
+----------------------------------------------------------------
+ 11. CONTOH DESIGN TOKEN (CSS)
+----------------------------------------------------------------
+
+:root {
+  /* font */
+  --font-heading: "Fraunces", Georgia, serif;
+  --font-body: "Instrument Sans", system-ui, sans-serif;
+
+  /* ukuran */
+  --text-xs: 0.75rem;   /* 12 */
+  --text-sm: 0.875rem;  /* 14 */
+  --text-base: 1rem;    /* 16 */
+  --text-lg: 1.125rem;  /* 18 */
+  --text-xl: 1.25rem;   /* 20 */
+  --text-2xl: 1.5625rem;/* 25 */
+  --text-3xl: 1.9375rem;/* 31 */
+  --text-4xl: 2.4375rem;/* 39 */
+  --text-5xl: 3.0625rem;/* 49 */
+
+  /* warna */
+  --bg: #F4F1E8;
+  --surface: #FBF9F3;
+  --ink: #1B1F1A;
+  --ink-muted: #5B6358;
+  --line: #DDD6C6;
+  --primary: #1F3D2B;
+  --primary-hover: #162E20;
+  --accent: #C2562E;
+
+  /* spacing */
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px;
+  --space-4: 16px; --space-6: 24px;  --space-8: 32px;
+  --space-12: 48px; --space-16: 64px; --space-24: 96px;
+
+  /* bentuk */
+  --radius: 6px;
+  --radius-pill: 999px;
+  --shadow-float: 0 1px 2px rgba(27,31,26,.06),
+                  0 8px 24px rgba(27,31,26,.08);
+
+  /* motion */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+}
+
+
+----------------------------------------------------------------
+ 12. CHECKLIST SEBELUM DESAIN DIANGGAP SELESAI
+----------------------------------------------------------------
+
+ARAH
+[ ] Ada 3 kata kunci desain yang spesifik dan semua keputusan
+    bisa dikaitkan ke kata kunci itu
+[ ] Kalau logo diganti, web ini tetap terasa berbeda dari web lain
+
+TIPOGRAFI
+[ ] Maksimal 2 font dan 3 ketebalan
+[ ] Semua ukuran berasal dari skala, tidak ada angka acak
+[ ] Paragraf maksimal ±65 karakter per baris
+[ ] Angka/harga memakai tabular-nums
+
+WARNA
+[ ] Tidak ada gradien dekoratif
+[ ] Palet <= 1 primer + 1 aksen + netral
+[ ] Semua teks lolos kontras WCAG AA
+
+LAYOUT & KOMPONEN
+[ ] Bukan pola hero center + 3 kartu + testimoni
+[ ] Konten nyata terlihat di layar pertama
+[ ] Radius dan shadow konsisten
+[ ] Semua state komponen didesain (termasuk empty & error)
+[ ] Target sentuh >= 44px
+
+KONTEN
+[ ] Tidak ada kata "revolusioner, seamless, unlock, elevate"
+[ ] Tidak ada testimoni/statistik palsu
+[ ] Tidak ada emoji sebagai ikon
+[ ] Foto konsisten gayanya, bukan stok/AI generik
+
+INTERAKSI & AKSES
+[ ] Setiap animasi punya fungsi, durasi <= 400ms
+[ ] prefers-reduced-motion dihormati
+[ ] Fokus keyboard terlihat
+[ ] Lighthouse >= 90
+
+================================================================
+ Ringkasnya: anti-slop = spesifik, konsisten, jujur, dan punya
+ alasan. Default boleh dipakai, asal dipilih dengan sadar.
+================================================================
