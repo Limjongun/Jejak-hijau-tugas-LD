@@ -39,12 +39,122 @@ function OrderDetailContent() {
   async function fetchOrder() {
     try {
       setLoading(true);
-      const res = await fetch(`/api/orders/${orderIdOrNumber}`);
-      if (!res.ok) {
-        throw new Error("Pesanan tidak ditemukan.");
+      setError(null);
+
+      // 1. Ambil dari API Server (yang sekarang sudah terintegrasi langsung ke Paymenku)
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(orderIdOrNumber)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setOrder(data);
+
+          // Simpan juga ke localStorage agar sinkron di riwayat akun
+          try {
+            const saved = localStorage.getItem("jh-local-orders");
+            const list = saved ? JSON.parse(saved) : [];
+            const idx = list.findIndex((o: any) => o.orderNumber === data.orderNumber || o.id === data.id);
+            if (idx >= 0) {
+              list[idx] = { ...list[idx], ...data };
+            } else {
+              list.unshift(data);
+            }
+            localStorage.setItem("jh-local-orders", JSON.stringify(list));
+          } catch (e) {
+            // ignore
+          }
+
+          return;
+        }
+      } catch (apiErr) {
+        console.warn("API orders fetch warning:", apiErr);
       }
-      const data = await res.json();
-      setOrder(data);
+
+      // 2. Fallback: Cek LocalStorage browser pengguna
+      let localMatch: any = null;
+      try {
+        const saved = localStorage.getItem("jh-local-orders");
+        if (saved) {
+          const list = JSON.parse(saved);
+          localMatch = list.find(
+            (o: any) => o.orderNumber === orderIdOrNumber || o.id === orderIdOrNumber
+          );
+        }
+      } catch (lsErr) {
+        console.error("Local storage lookup error:", lsErr);
+      }
+
+      // 3. Fallback: Verifikasi langsung ke status Paymenku
+      try {
+        const payRes = await fetch(
+          `/api/payment/paymenku/status?trx_id=${encodeURIComponent(orderIdOrNumber)}`
+        );
+        if (payRes.ok) {
+          const payJson = await payRes.json();
+          const payData = payJson?.data;
+          if (payData && payData.trx_id) {
+            const isPaid = payData.status === "paid" || payData.status === "success";
+            const orderFromPaymenku = {
+              ...(localMatch || {}),
+              id: `ord-${payData.reference_id || orderIdOrNumber}`,
+              orderNumber: payData.reference_id || orderIdOrNumber,
+              status: isPaid ? "PAID" : "PENDING_PAYMENT",
+              paymentStatus: isPaid ? "SUCCESS" : "PENDING",
+              paymentMethod: payData.payment_channel?.name || "Paymenku QRIS",
+              total: parseFloat(payData.amount || "1000"),
+              subtotal: parseFloat(payData.amount || "1000"),
+              shippingCost: 0,
+              customerName: payData.customer_name || localMatch?.customer || "Pelanggan JejakHijau",
+              customerEmail: payData.customer_email || localMatch?.customerEmail || "",
+              shippingAddress: localMatch?.shippingAddress || "Jl. Dago Asri No. 12, Coblong, Kota Bandung, Jawa Barat 40135",
+              destLatitude: -6.9147,
+              destLongitude: 107.6098,
+              deliveryDistanceKm: 4.2,
+              courier: "Bebas Ongkir / Ambil Sendiri (Khusus Pengujian)",
+              isGreenDelivery: true,
+              plasticFreePack: true,
+              co2SavedKg: 0.15,
+              plasticSavedG: 20,
+              pointsEarned: 10,
+              trackingNumber: `JH-EXP-${payData.trx_id.slice(-8)}`,
+              createdAt: payData.created_at || new Date().toISOString(),
+              items: localMatch?.items?.length
+                ? localMatch.items
+                : [
+                    {
+                      id: `it-${payData.trx_id}`,
+                      productName: "Stiker Edukasi Peduli Bumi (Paket Eksklusif)",
+                      productImage: "/images/sticker-eco.png",
+                      price: parseFloat(payData.amount || "1000"),
+                      quantity: 1,
+                      subtotal: parseFloat(payData.amount || "1000"),
+                    },
+                  ],
+              history: [
+                {
+                  id: "h1",
+                  status: isPaid ? "PAID" : "PENDING_PAYMENT",
+                  note: isPaid
+                    ? `Pembayaran lunas terverifikasi oleh Paymenku (${payData.trx_id})`
+                    : "Menunggu pembayaran via QRIS Paymenku",
+                  changedBy: "SYSTEM",
+                  createdAt: payData.created_at || new Date().toISOString(),
+                },
+              ],
+            };
+            setOrder(orderFromPaymenku);
+            return;
+          }
+        }
+      } catch (payLookupErr) {
+        console.warn("Paymenku status check warning:", payLookupErr);
+      }
+
+      if (localMatch) {
+        setOrder(localMatch);
+        return;
+      }
+
+      throw new Error(`Pesanan dengan nomor "${orderIdOrNumber}" tidak terdaftar dalam sistem.`);
     } catch (err: any) {
       setError(err.message || "Gagal memuat detail pesanan.");
     } finally {

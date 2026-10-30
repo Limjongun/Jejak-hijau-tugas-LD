@@ -151,6 +151,51 @@ export default function CheckoutPage() {
       const json = await res.json();
       if (res.ok && json.success && json.data) {
         setPaymenkuData(json.data);
+
+        // Pre-simpan pesanan ke riwayat lokal agar langsung terbaca jika pengguna dialihkan oleh Paymenku
+        try {
+          const preSavedOrder = {
+            id: `ord-${json.data.transactionId || Date.now()}`,
+            orderNumber: generatedOrderNumber,
+            customer: recipient || (user ? user.name : "Pelanggan"),
+            customerEmail: user ? user.email : "pelanggan@jejakhijau.id",
+            total: grandTotal,
+            subtotal,
+            shippingCost,
+            status: "PENDING_PAYMENT",
+            createdAt: new Date().toISOString(),
+            date: new Date().toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            courier: currentCourier.name,
+            plasticFree: usePlasticFree,
+            isGreenDelivery: currentCourier.isGreen,
+            co2Saved: impact.co2Kg,
+            plasticSaved: impact.plasticPcs,
+            trackingNumber: `EXP-ID-${Math.floor(100000000 + Math.random() * 900000000)}`,
+            itemCount: items.reduce((acc, i) => acc + i.quantity, 0),
+            items: items.map((i) => ({
+              id: `it-${Date.now()}-${i.product.id}`,
+              productId: i.product.id,
+              name: i.product.name,
+              productName: i.product.name,
+              image: i.product.images[0] || "",
+              productImage: i.product.images[0] || "",
+              price: i.product.price,
+              quantity: i.quantity,
+              co2SavedKg: i.product.co2SavedKg,
+            })),
+          };
+          const existing = JSON.parse(localStorage.getItem("jh-local-orders") || "[]");
+          const filtered = existing.filter((o: any) => o.orderNumber !== generatedOrderNumber);
+          localStorage.setItem("jh-local-orders", JSON.stringify([preSavedOrder, ...filtered]));
+        } catch (lsErr) {
+          // ignore
+        }
       } else {
         setPaymenkuError(json?.error || "Gagal membuat transaksi ke server Paymenku.");
       }
