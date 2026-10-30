@@ -80,6 +80,31 @@ export const CATEGORIES: Category[] = [
 
 export const PRODUCTS: Product[] = [
   {
+    id: "prod-stiker-bumi",
+    name: "Stiker Edukasi Peduli Bumi (Kertas Daur Ulang)",
+    slug: "stiker-edukasi-peduli-bumi",
+    sku: "ECO-STK-001",
+    description:
+      "Stiker ramah lingkungan berbahan 100% kertas daur ulang (recycled kraft) dengan perekat berbasis air dan cetakan tinta kedelai alami. Cocok ditempel pada tumbler, laptop, atau tempat makan untuk menyebarkan pesan pelestarian bumi. Disediakan khusus dengan harga Rp 1.000 untuk pengujian transaksi Paymenku.",
+    price: 1000,
+    originalPrice: 5000,
+    stock: 999,
+    weightGram: 5,
+    status: "ACTIVE",
+    isFeatured: true,
+    co2SavedKg: 0.1,
+    plasticSavedPcs: 1,
+    impactNote: "Menggantikan stiker plastik vinil dengan kertas daur ulang terurai 100%",
+    avgRating: 5.0,
+    reviewCount: 24,
+    soldCount: 150,
+    categoryId: "cat-2",
+    images: [
+      "https://images.unsplash.com/photo-1572375992501-4b0892d50c69?auto=format&fit=crop&w=800&q=80",
+    ],
+    sdgIds: [12, 13],
+  },
+  {
     id: "prod-1",
     name: "Panel Surya Portable 20W",
     slug: "panel-surya-portable-20w",

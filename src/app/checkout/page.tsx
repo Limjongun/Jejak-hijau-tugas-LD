@@ -68,6 +68,13 @@ export default function CheckoutPage() {
 
   const couriers = [
     {
+      id: "pickup-testing",
+      name: "Bebas Ongkir / Ambil Sendiri (Khusus Pengujian)",
+      desc: "Ambil langsung di green hub atau pengiriman digital stiker (Rp 0)",
+      cost: 0,
+      isGreen: true,
+    },
+    {
       id: "green-express",
       name: "Kurir Motor Listrik (Green Delivery)",
       desc: "Armada niremisi listrik khusus area perkotaan",
