@@ -10,13 +10,6 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "jejakhijau-db",
-      "database_id": "your-d1-database-uuid"
-    }
-  ],
   "vars": {
     "NEXT_PUBLIC_APP_URL": "https://jejakhijau.id"
   }
