@@ -5,7 +5,11 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const error = searchParams.get("error");
 
-  const baseUrl = origin && origin !== "null" ? origin : "https://jejakhijau.web.id";
+  // Pastikan baseUrl selalu HTTPS di production
+  let baseUrl = origin && origin !== "null" ? origin : "https://jejakhijau.web.id";
+  if (baseUrl.includes("jejakhijau.web.id")) {
+    baseUrl = "https://jejakhijau.web.id";
+  }
 
   // Jika otorisasi dibatalkan atau terjadi error di sisi Google
   if (error || !code) {
@@ -13,11 +17,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${baseUrl}/login?error=${encodeURIComponent(error || "Akses Google dibatalkan")}`);
   }
 
-  const clientId =
+  // Dapatkan kredensial dari Cloudflare context (env & secrets) atau process.env
+  let clientId =
     process.env.GOOGLE_CLIENT_ID ||
     process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
     "305605426972-gm652e4bvoaud3k1mkujes5fsb1ho6um.apps.googleusercontent.com";
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  let clientSecret = process.env.GOOGLE_CLIENT_SECRET || "";
+
+  try {
+    const cfContext = (globalThis as any)[Symbol.for("__cloudflare-context__")];
+    if (cfContext?.env) {
+      if (cfContext.env.GOOGLE_CLIENT_ID) {
+        clientId = cfContext.env.GOOGLE_CLIENT_ID;
+      }
+      if (cfContext.env.GOOGLE_CLIENT_SECRET) {
+        clientSecret = cfContext.env.GOOGLE_CLIENT_SECRET;
+      }
+    }
+  } catch (cfErr) {
+    console.warn("Cloudflare context lookup error:", cfErr);
+  }
+
   const redirectUri = `${baseUrl}/api/auth/callback/google`;
 
   try {
@@ -28,7 +48,7 @@ export async function GET(request: NextRequest) {
       body: new URLSearchParams({
         code,
         client_id: clientId,
-        client_secret: clientSecret || "",
+        client_secret: clientSecret,
         redirect_uri: redirectUri,
         grant_type: "authorization_code",
       }),
@@ -37,7 +57,9 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errBody = await tokenResponse.text();
       console.error("Gagal menukar kode token Google:", errBody);
-      return NextResponse.redirect(`${baseUrl}/login?error=token_exchange_failed`);
+      return NextResponse.redirect(
+        `${baseUrl}/login?error=token_exchange_failed&details=${encodeURIComponent(errBody.slice(0, 120))}`
+      );
     }
 
     const tokenData = await tokenResponse.json();
