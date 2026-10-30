@@ -6,13 +6,13 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ProductCard } from "@/components/product-card";
-import { SDGS } from "@/data/initial-data";
+import { SDGS, PRODUCTS, CATEGORIES } from "@/data/initial-data";
 import type { Product, Category } from "@/types";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>(PRODUCTS);
+  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedSdg, setSelectedSdg] = useState<number | null>(null);
@@ -27,14 +27,18 @@ export default function ProductsPage() {
         ]);
         if (prodRes.ok) {
           const prodData = await prodRes.json();
-          setProducts(prodData);
+          if (Array.isArray(prodData) && prodData.length > 0) {
+            setProducts(prodData);
+          }
         }
         if (catRes.ok) {
           const catData = await catRes.json();
-          setCategories(catData);
+          if (Array.isArray(catData) && catData.length > 0) {
+            setCategories(catData);
+          }
         }
       } catch (err) {
-        console.error("Failed to load products from database:", err);
+        console.warn("Using offline fallback catalog data:", err);
       } finally {
         setLoading(false);
       }

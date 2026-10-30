@@ -28,9 +28,29 @@ function ProductDetailContent() {
   const router = useRouter();
   const slug = params?.slug as string;
 
-  const [product, setProduct] = useState<any>(null);
-  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState<any>(() => {
+    const found = PRODUCTS.find((p) => p.slug === slug || p.id === slug);
+    if (found) {
+      const cat = CATEGORIES.find((c) => c.id === found.categoryId);
+      return {
+        ...found,
+        categoryName: cat?.name || "Katalog Hijau",
+        categorySlug: cat?.slug || "all",
+        reviews: [],
+      };
+    }
+    return null;
+  });
+
+  const [relatedProducts, setRelatedProducts] = useState<any[]>(() => {
+    const found = PRODUCTS.find((p) => p.slug === slug || p.id === slug);
+    if (found) {
+      return PRODUCTS.filter((p) => p.id !== found.id && p.categoryId === found.categoryId).slice(0, 4);
+    }
+    return [];
+  });
+
+  const [loading, setLoading] = useState(!product);
 
   const addItem = useCartStore((state) => state.addItem);
 
@@ -44,7 +64,6 @@ function ProductDetailContent() {
     if (!slug) return;
     async function fetchProduct() {
       try {
-        setLoading(true);
         const res = await fetch(`/api/products/${slug}`);
         if (res.ok) {
           const data = await res.json();
@@ -56,7 +75,7 @@ function ProductDetailContent() {
           }
         }
       } catch (e) {
-        console.error("Failed to load product detail:", e);
+        console.warn("Using offline fallback product detail:", e);
       } finally {
         setLoading(false);
       }
