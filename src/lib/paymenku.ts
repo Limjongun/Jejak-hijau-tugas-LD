@@ -23,10 +23,30 @@ export interface PaymenkuPaymentResponse {
   message: string;
 }
 
-const MERCHANT_CODE = process.env.PAYMENKU_MERCHANT_CODE || "PJH-8829";
-const API_KEY = process.env.PAYMENKU_API_KEY || "pmk_live_98234789123";
-const SECRET_KEY = process.env.PAYMENKU_SECRET_KEY || "sec_live_abcdef123456";
-const BASE_URL = process.env.PAYMENKU_BASE_URL || "https://api.paymenku.com/v1";
+export function getPaymenkuConfig() {
+  let merchantCode = process.env.PAYMENKU_MERCHANT_CODE || "Jejak-hijau";
+  let apiKey = process.env.PAYMENKU_API_KEY || "";
+  let secretKey = process.env.PAYMENKU_SECRET_KEY || "";
+  let baseUrl = process.env.PAYMENKU_BASE_URL || "https://api.paymenku.com/v1";
+  let callbackUrl = process.env.PAYMENKU_CALLBACK_URL || "https://jejakhijau.web.id/api/payment/paymenku/webhook";
+  let returnUrl = process.env.PAYMENKU_RETURN_URL || "https://jejakhijau.web.id/orders";
+
+  try {
+    const cfContext = (globalThis as any)[Symbol.for("__cloudflare-context__")];
+    if (cfContext?.env) {
+      if (cfContext.env.PAYMENKU_MERCHANT_CODE) merchantCode = cfContext.env.PAYMENKU_MERCHANT_CODE;
+      if (cfContext.env.PAYMENKU_API_KEY) apiKey = cfContext.env.PAYMENKU_API_KEY;
+      if (cfContext.env.PAYMENKU_SECRET_KEY) secretKey = cfContext.env.PAYMENKU_SECRET_KEY;
+      if (cfContext.env.PAYMENKU_BASE_URL) baseUrl = cfContext.env.PAYMENKU_BASE_URL;
+      if (cfContext.env.PAYMENKU_CALLBACK_URL) callbackUrl = cfContext.env.PAYMENKU_CALLBACK_URL;
+      if (cfContext.env.PAYMENKU_RETURN_URL) returnUrl = cfContext.env.PAYMENKU_RETURN_URL;
+    }
+  } catch (err) {
+    // ignore
+  }
+
+  return { merchantCode, apiKey, secretKey, baseUrl, callbackUrl, returnUrl };
+}
 
 /**
  * Generate signature for Paymenku API request
@@ -51,11 +71,12 @@ export function verifyPaymenkuSignature(
   amount: number
 ): boolean {
   if (!incomingSignature) return false;
+  const cfg = getPaymenkuConfig();
   const expectedSignature = generatePaymenkuSignature(
-    MERCHANT_CODE,
+    cfg.merchantCode,
     orderNumber,
     amount,
-    SECRET_KEY
+    cfg.secretKey
   );
   return incomingSignature.toLowerCase() === expectedSignature.toLowerCase();
 }
@@ -66,34 +87,35 @@ export function verifyPaymenkuSignature(
 export async function createPaymenkuTransaction(
   req: PaymenkuPaymentRequest
 ): Promise<PaymenkuPaymentResponse> {
+  const cfg = getPaymenkuConfig();
   const signature = generatePaymenkuSignature(
-    MERCHANT_CODE,
+    cfg.merchantCode,
     req.orderNumber,
     req.amount,
-    SECRET_KEY
+    cfg.secretKey
   );
 
   const payload = {
-    merchant_code: MERCHANT_CODE,
+    merchant_code: cfg.merchantCode,
     order_id: req.orderNumber,
     amount: req.amount,
     method: req.paymentMethod || "QRIS",
     customer_name: req.customerName,
     customer_email: req.customerEmail,
     customer_phone: req.customerPhone || "081234567890",
-    callback_url: process.env.PAYMENKU_CALLBACK_URL || "http://localhost:3000/api/payment/paymenku/webhook",
-    return_url: `${process.env.PAYMENKU_RETURN_URL || "http://localhost:3000/orders"}/${req.orderNumber}`,
+    callback_url: cfg.callbackUrl,
+    return_url: `${cfg.returnUrl}/${req.orderNumber}`,
     signature,
   };
 
   try {
     // If running in live environment with valid API key
-    if (process.env.PAYMENKU_API_KEY && process.env.PAYMENKU_SECRET_KEY) {
-      const response = await fetch(`${BASE_URL}/transactions/create`, {
+    if (cfg.apiKey && cfg.secretKey) {
+      const response = await fetch(`${cfg.baseUrl}/transactions/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${API_KEY}`,
+          Authorization: `Bearer ${cfg.apiKey}`,
         },
         body: JSON.stringify(payload),
       });
