@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Leaf, Mail, Lock, ArrowRight, ShieldAlert } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { useAuthStore } from "@/stores/auth-store";
 import { GoogleAuthButton } from "@/components/google-auth-button";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlError = searchParams?.get("error");
   const { syncFromDatabase, login } = useAuthStore();
 
   const [email, setEmail] = useState("");
@@ -19,6 +21,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [adminNotice, setAdminNotice] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    if (urlError) {
+      if (urlError === "token_exchange_failed") {
+        setErrorMessage("Gagal menghubungkan otorisasi Google. Pastikan Client ID dan Secret sudah sinkron.");
+      } else if (urlError === "fetch_userinfo_failed") {
+        setErrorMessage("Gagal mengambil profil akun Google.");
+      } else {
+        setErrorMessage(`Kendala masuk Google: ${urlError}`);
+      }
+    }
+  }, [urlError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,5 +222,13 @@ export default function LoginPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

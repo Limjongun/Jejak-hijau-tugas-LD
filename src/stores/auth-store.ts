@@ -41,8 +41,8 @@ export const useAuthStore = create<AuthState>()(
           name: userName.charAt(0).toUpperCase() + userName.slice(1),
           email,
           role: isAdmin ? "ADMIN" : "CUSTOMER",
-          points: points !== undefined ? points : isAdmin ? 9999 : 750,
-          phone: phone || "081234567890",
+          points: points !== undefined ? points : isAdmin ? 9999 : 100,
+          phone: phone || "",
           memberSince: "Oktober 2026",
         };
 
@@ -112,6 +112,11 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "jejakhijau-auth-storage",
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        if (state?.user?.email === "alim.pratama.work@gmail.com") {
+          state.logout();
+        }
+      },
     }
   )
 );

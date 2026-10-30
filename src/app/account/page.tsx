@@ -31,6 +31,14 @@ function AccountContent() {
   const [dbUser, setDbUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Otomatis bersihkan sesi dummy lama jika masih tersisa di browser pengguna
+  useEffect(() => {
+    if (authUser?.email === "alim.pratama.work@gmail.com") {
+      logout();
+      router.replace("/login");
+    }
+  }, [authUser, logout, router]);
+
   // Jika kembali dari Google OAuth SSO, segera simpan ke auth store
   useEffect(() => {
     if (isSsoGoogle && queryEmail) {
@@ -84,20 +92,24 @@ function AccountContent() {
           }
         } else if (authUser) {
           // Fallback dari auth-store
+          const calculatedCo2 = localOrders.reduce((acc, o) => acc + (o.co2SavedKg || 0), 0);
+          const calculatedPlastic = localOrders.reduce((acc, o) => acc + (o.plasticSavedPcs || 0), 0);
+          const calculatedTrees = localOrders.reduce((acc, o) => acc + (o.treesPlanted || 0), 0);
+
           setDbUser({
             id: authUser.id,
             name: authUser.name,
             email: authUser.email,
-            phone: authUser.phone || "+62 812-3456-7890",
+            phone: authUser.phone || "-",
             role: authUser.role,
             points: authUser.points,
-            totalCo2Kg: 12.8,
-            totalPlastic: 24,
+            totalCo2Kg: calculatedCo2,
+            totalPlastic: calculatedPlastic,
             hasPassword: false,
             isGoogleAuth: true,
             memberSince: authUser.memberSince || "Oktober 2026",
             ordersCount: localOrders.length,
-            donatedTreesCount: 1,
+            donatedTreesCount: calculatedTrees,
           });
         }
 
