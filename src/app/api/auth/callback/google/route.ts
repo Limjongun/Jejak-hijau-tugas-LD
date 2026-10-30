@@ -55,29 +55,44 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${origin}/login?error=email_not_provided`);
     }
 
-    // 3. Sinkronkan dengan Database SQLite Lokal (Upsert User)
-    const dbUser = await prisma.user.upsert({
-      where: { email },
-      update: {
-        name: name || undefined,
-        image: picture || undefined,
-        emailVerified: new Date(),
-      },
-      create: {
-        email,
-        name: name || email.split("@")[0],
-        image: picture || null,
-        emailVerified: new Date(),
-        role: "CUSTOMER",
-        ecoPoints: 100, // Bonus sambutan akun baru
-      },
-    });
+    let userEmail = email;
+    let userName = name || email.split("@")[0];
+    let userRole = "CUSTOMER";
+    let userPoints = 100;
 
-    // 4. Sukses: Redirect ke halaman Akun Pelanggan dengan parameter sesi
-    const response = NextResponse.redirect(`${origin}/account?sso=google&email=${encodeURIComponent(dbUser.email)}`);
+    // 3. Sinkronkan dengan Database jika database online
+    try {
+      const dbUser = await prisma.user.upsert({
+        where: { email },
+        update: {
+          name: name || undefined,
+          image: picture || undefined,
+          emailVerified: new Date(),
+        },
+        create: {
+          email,
+          name: name || email.split("@")[0],
+          image: picture || null,
+          emailVerified: new Date(),
+          role: "CUSTOMER",
+          ecoPoints: 100, // Bonus sambutan akun baru
+        },
+      });
+      userEmail = dbUser.email;
+      userName = dbUser.name;
+      userRole = dbUser.role;
+      userPoints = dbUser.ecoPoints;
+    } catch (dbErr) {
+      console.warn("Database offline during Google OAuth upsert, using Google UserInfo profile:", dbErr);
+    }
+
+    // 4. Sukses: Redirect ke halaman Akun Pelanggan dengan parameter sesi asli
+    const response = NextResponse.redirect(
+      `${origin}/account?sso=google&email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&role=${userRole}&points=${userPoints}`
+    );
     
     // Set cookie sesi aman
-    response.cookies.set("jh_session_email", dbUser.email, {
+    response.cookies.set("jh_session_email", userEmail, {
       path: "/",
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",

@@ -21,11 +21,27 @@ function AccountContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryEmail = searchParams?.get("email");
+  const queryName = searchParams?.get("name");
+  const queryRole = (searchParams?.get("role") as any) || "CUSTOMER";
+  const queryPoints = searchParams?.get("points") ? parseInt(searchParams.get("points")!) : 100;
+  const isSsoGoogle = searchParams?.get("sso") === "google";
 
   const { user: authUser, logout, login } = useAuthStore();
   const [orders, setOrders] = useState<any[]>([]);
   const [dbUser, setDbUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Jika kembali dari Google OAuth SSO, segera simpan ke auth store
+  useEffect(() => {
+    if (isSsoGoogle && queryEmail) {
+      login(
+        queryEmail,
+        queryRole,
+        queryName || queryEmail.split("@")[0],
+        queryPoints
+      );
+    }
+  }, [isSsoGoogle, queryEmail, queryName, queryRole, queryPoints, login]);
 
   // Deteksi email aktif dari query param (SSO Google) atau authUser store
   const activeEmail = queryEmail || authUser?.email;

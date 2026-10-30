@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { useAuthStore } from "@/stores/auth-store";
-import { useRouter } from "next/navigation";
 
 interface GoogleAuthButtonProps {
   redirectUrl?: string;
@@ -15,41 +13,21 @@ export function GoogleAuthButton({
   buttonText = "Lanjutkan dengan Google",
 }: GoogleAuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const { login, syncFromDatabase } = useAuthStore();
-  const router = useRouter();
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = () => {
     setIsLoading(true);
 
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const googleClientId =
+      process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+      "305605426972-gm652e4bvoaud3k1mkujes5fsb1ho6um.apps.googleusercontent.com";
 
-    // Jika Google Client ID sudah disetel di .env, arahkan ke Google OAuth 2.0 resmi
-    if (
-      googleClientId &&
-      googleClientId.trim() !== "" &&
-      !googleClientId.includes("your-google-client-id")
-    ) {
-      const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/google`);
-      const scope = encodeURIComponent("openid email profile");
-      const state = encodeURIComponent(`target_${redirectUrl}_${Date.now()}`);
-      const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=select_account`;
-      window.location.href = googleAuthUrl;
-      return;
-    }
+    const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/callback/google`);
+    const scope = encodeURIComponent("openid email profile");
+    const state = encodeURIComponent(`target_${redirectUrl}_${Date.now()}`);
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=select_account`;
 
-    // Fallback pengembangan lokal jika GOOGLE_CLIENT_ID belum diisi di .env
-    try {
-      const devGoogleEmail = "alim.pratama.work@gmail.com";
-      await syncFromDatabase(devGoogleEmail);
-      login(devGoogleEmail, "CUSTOMER", "Alim Pratama (Google Account)");
-      router.push(redirectUrl);
-    } catch (err) {
-      console.warn("Sinkronisasi database lokal fallback:", err);
-      login("user@jejakhijau.id", "CUSTOMER", "Pelanggan JejakHijau");
-      router.push(redirectUrl);
-    } finally {
-      setIsLoading(false);
-    }
+    // Arahkan browser langsung ke halaman login resmi Google
+    window.location.href = googleAuthUrl;
   };
 
   return (
