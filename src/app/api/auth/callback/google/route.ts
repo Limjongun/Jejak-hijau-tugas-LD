@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -54,53 +53,23 @@ export async function GET(request: NextRequest) {
     }
 
     const googleProfile = await userinfoResponse.json();
-    const { email, name, picture } = googleProfile;
+    const { email, name } = googleProfile;
 
     if (!email) {
       return NextResponse.redirect(`${baseUrl}/login?error=email_not_provided`);
     }
 
-    let userEmail = email;
-    let userName = name || email.split("@")[0];
-    let userRole = "CUSTOMER";
-    let userPoints = 100;
+    const userEmail = email;
+    const userName = name || email.split("@")[0];
+    const userRole = "CUSTOMER";
+    const userPoints = 100;
 
-    // 3. Sinkronkan dengan Database jika database online
-    try {
-      if (prisma && prisma.user && typeof prisma.user.upsert === "function") {
-        const dbUser = await prisma.user.upsert({
-          where: { email },
-          update: {
-            name: name || undefined,
-            image: picture || undefined,
-            emailVerified: new Date(),
-          },
-          create: {
-            email,
-            name: name || email.split("@")[0],
-            image: picture || null,
-            emailVerified: new Date(),
-            role: "CUSTOMER",
-            ecoPoints: 100, // Bonus sambutan akun baru
-          },
-        });
-        if (dbUser) {
-          userEmail = dbUser.email;
-          userName = dbUser.name;
-          userRole = dbUser.role;
-          userPoints = dbUser.ecoPoints;
-        }
-      }
-    } catch (dbErr) {
-      console.warn("Database offline during Google OAuth upsert, using Google UserInfo profile:", dbErr);
-    }
-
-    // 4. Sukses: Redirect ke halaman Akun Pelanggan dengan parameter sesi asli
+    // 3. Sukses: Redirect ke halaman Akun Pelanggan dengan parameter sesi profil asli Google
     const response = NextResponse.redirect(
       `${baseUrl}/account?sso=google&email=${encodeURIComponent(userEmail)}&name=${encodeURIComponent(userName)}&role=${userRole}&points=${userPoints}`
     );
 
-    // Set cookie sesi aman
+    // Set cookie sesi
     response.cookies.set("jh_session_email", userEmail, {
       path: "/",
       httpOnly: false,

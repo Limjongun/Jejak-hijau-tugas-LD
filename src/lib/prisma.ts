@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: any;
@@ -16,7 +15,7 @@ function createSafeFallbackProxy(): any {
           {
             get(target2, method) {
               return async () => {
-                throw new Error("Local SQLite database is offline on Cloudflare serverless edge.");
+                throw new Error("Database is running in serverless edge mode.");
               };
             },
           }
@@ -27,32 +26,20 @@ function createSafeFallbackProxy(): any {
 }
 
 function makePrismaClient(): any {
-  const dbUrl = process.env.DATABASE_URL;
-
-  // Jika di Cloudflare Worker dan tidak ada database URL remote (misal libsql:// atau https://)
-  if (!dbUrl || dbUrl.startsWith("file:")) {
-    try {
-      // Hanya inisialisasi PrismaClient standar jika benar-benar di lingkungan runtime Node.js lokal
-      if (typeof process !== "undefined" && process.release && process.release.name === "node") {
-        return new PrismaClient();
-      }
-    } catch {
-      // Abaikan dan gunakan safe proxy
-    }
-    return createSafeFallbackProxy();
-  }
-
   try {
-    const adapter = new PrismaLibSql({ url: dbUrl });
-    return new PrismaClient({ adapter });
-  } catch (err) {
-    console.warn("PrismaLibSql initialization caught:", err);
-    try {
+    // Hanya gunakan PrismaClient di lingkungan Node.js murni (misal build time atau local server)
+    if (
+      typeof process !== "undefined" &&
+      process.release &&
+      process.release.name === "node" &&
+      typeof window === "undefined"
+    ) {
       return new PrismaClient();
-    } catch {
-      return createSafeFallbackProxy();
     }
+  } catch (err) {
+    console.warn("PrismaClient initialization fallback:", err);
   }
+  return createSafeFallbackProxy();
 }
 
 export const prisma = globalForPrisma.prisma ?? makePrismaClient();
