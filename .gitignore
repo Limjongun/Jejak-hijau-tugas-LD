@@ -42,6 +42,7 @@ dev.db
 
 # open-next / cloudflare build
 .open-next
+.wrangler
 
 # vercel
 .vercel

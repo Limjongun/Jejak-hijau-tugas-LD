@@ -10,7 +10,14 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "routes": [
+    {
+      "pattern": "jejakhijau.web.id",
+      "custom_domain": true
+    }
+  ],
   "vars": {
-    "NEXT_PUBLIC_APP_URL": "https://jejakhijau.web.id"
+    "NEXT_PUBLIC_APP_URL": "https://jejakhijau.web.id",
+    "GOOGLE_CLIENT_ID": "305605426972-gm652e4bvoaud3k1mkujes5fsb1ho6um.apps.googleusercontent.com"
   }
 }
