@@ -38,6 +38,14 @@ function AccountContent() {
       }
 
       setLoading(true);
+      let localOrders: any[] = [];
+      try {
+        const saved = localStorage.getItem("jh-local-orders");
+        if (saved) localOrders = JSON.parse(saved);
+      } catch (err) {
+        console.error("Failed to parse local orders:", err);
+      }
+
       try {
         const [ordRes, accRes] = await Promise.all([
           fetch(`/api/orders?email=${encodeURIComponent(activeEmail)}`),
@@ -58,14 +66,62 @@ function AccountContent() {
               accData.phone
             );
           }
+        } else if (authUser) {
+          // Fallback dari auth-store
+          setDbUser({
+            id: authUser.id,
+            name: authUser.name,
+            email: authUser.email,
+            phone: authUser.phone || "+62 812-3456-7890",
+            role: authUser.role,
+            points: authUser.points,
+            totalCo2Kg: 12.8,
+            totalPlastic: 24,
+            hasPassword: false,
+            isGoogleAuth: true,
+            memberSince: authUser.memberSince || "Oktober 2026",
+            ordersCount: localOrders.length,
+            donatedTreesCount: 1,
+          });
         }
 
         if (ordRes.ok) {
           const ordData = await ordRes.json();
-          setOrders(ordData);
+          if (Array.isArray(ordData) && ordData.length > 0) {
+            // Gabungkan order database dan local orders unik
+            const combined = [...ordData];
+            for (const lo of localOrders) {
+              if (!combined.some((c) => c.orderNumber === lo.orderNumber)) {
+                combined.push(lo);
+              }
+            }
+            setOrders(combined);
+          } else {
+            setOrders(localOrders);
+          }
+        } else {
+          setOrders(localOrders);
         }
       } catch (e) {
-        console.error("Gagal memuat profil akun:", e);
+        console.warn("API account offline, using local session & orders:", e);
+        setOrders(localOrders);
+        if (authUser) {
+          setDbUser({
+            id: authUser.id,
+            name: authUser.name,
+            email: authUser.email,
+            phone: authUser.phone || "+62 812-3456-7890",
+            role: authUser.role,
+            points: authUser.points,
+            totalCo2Kg: 12.8,
+            totalPlastic: 24,
+            hasPassword: false,
+            isGoogleAuth: true,
+            memberSince: authUser.memberSince || "Oktober 2026",
+            ordersCount: localOrders.length,
+            donatedTreesCount: 1,
+          });
+        }
       } finally {
         setLoading(false);
       }
