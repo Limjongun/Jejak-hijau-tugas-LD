@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Format for easy frontend consumption
-    const formatted = products.map((p) => ({
+    const formatted = products.map((p: any) => ({
       id: p.id,
       name: p.name,
       slug: p.slug,
@@ -89,8 +89,8 @@ export async function GET(request: NextRequest) {
       categoryId: p.categoryId,
       categoryName: p.category.name,
       categorySlug: p.category.slug,
-      images: p.images.map((img) => img.url),
-      sdgIds: p.sdgs.map((s) => s.sdgId),
+      images: p.images.map((img: any) => img.url),
+      sdgIds: p.sdgs.map((s: any) => s.sdgId),
     }));
 
     return NextResponse.json(formatted);

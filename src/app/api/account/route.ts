@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
       }),
       ordersCount: user.orders.length,
       donatedTreesCount:
-        user.donations.filter((d) => d.status === "PLANTED").length + user.donations.length,
+        user.donations.filter((d: any) => d.status === "PLANTED").length + user.donations.length,
     });
   } catch (error: any) {
     console.error("GET /api/account error:", error);

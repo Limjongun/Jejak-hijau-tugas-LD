@@ -13,7 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true, updatedAt: true },
     });
 
-    productEntries = products.map((p) => ({
+    productEntries = products.map((p: any) => ({
       url: `${baseUrl}/products/${p.slug}`,
       lastModified: p.updatedAt || new Date(),
       changeFrequency: "weekly",

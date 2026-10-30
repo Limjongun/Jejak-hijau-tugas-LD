@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const formatted = orders.map((o) => ({
+    const formatted = orders.map((o: any) => ({
       id: o.id,
       orderNumber: o.orderNumber,
       customer: o.customerName || o.user?.name || "Pelanggan",
@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
       co2Saved: o.totalCo2Kg,
       plasticSaved: o.totalPlastic,
       trackingNumber: o.trackingNumber || "",
-      itemCount: o.items.reduce((acc, i) => acc + i.quantity, 0),
-      items: o.items.map((it) => ({
+      itemCount: o.items.reduce((acc: number, i: any) => acc + i.quantity, 0),
+      items: o.items.map((it: any) => ({
         id: it.id,
         productId: it.productId,
         name: it.productName,
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     const orderItemsData: any[] = [];
 
     for (const item of items) {
-      const prod = dbProducts.find((p) => p.id === item.productId);
+      const prod = dbProducts.find((p: any) => p.id === item.productId);
       if (!prod) {
         return NextResponse.json({ error: `Produk ID ${item.productId} tidak ditemukan.` }, { status: 404 });
       }
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
     const orderNumber = `JH-${dateStr}-${randomHex}`;
 
     // Execute atomic transaction in SQLite
-    const createdOrder = await prisma.$transaction(async (tx) => {
+    const createdOrder = await prisma.$transaction(async (tx: any) => {
       // Deduct stock and increment soldCount
       for (const item of items) {
         await tx.product.update({

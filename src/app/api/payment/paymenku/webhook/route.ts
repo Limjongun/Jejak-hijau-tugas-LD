@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     if (status === "PAID" || status === "SUCCESS" || status === "SETTLED") {
       // Update order to PAID
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: any) => {
         await tx.order.update({
           where: { id: order.id },
           data: {

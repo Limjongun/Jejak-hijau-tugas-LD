@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       include: { user: true },
     });
 
-    const formatted = trees.map((t) => ({
+    const formatted = trees.map((t: any) => ({
       id: t.id,
       user: t.user?.name || "Konsumen Hijau",
       userEmail: t.user?.email,
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const donation = await prisma.$transaction(async (tx) => {
+    const donation = await prisma.$transaction(async (tx: any) => {
       // Deduct points
       await tx.user.update({
         where: { id: user.id },

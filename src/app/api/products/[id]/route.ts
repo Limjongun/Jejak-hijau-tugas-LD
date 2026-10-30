@@ -52,9 +52,9 @@ export async function GET(
       categoryId: product.categoryId,
       categoryName: product.category.name,
       categorySlug: product.category.slug,
-      images: product.images.map((img) => img.url),
-      sdgIds: product.sdgs.map((s) => s.sdgId),
-      reviews: product.reviews.map((r) => ({
+      images: product.images.map((img: any) => img.url),
+      sdgIds: product.sdgs.map((s: any) => s.sdgId),
+      reviews: product.reviews.map((r: any) => ({
         id: r.id,
         userName: r.user.name,
         rating: r.rating,
