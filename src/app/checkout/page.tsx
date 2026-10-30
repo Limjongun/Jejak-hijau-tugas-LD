@@ -63,8 +63,12 @@ export default function CheckoutPage() {
   const [distanceKm, setDistanceKm] = useState(4.2);
   const [co2SavedDelivery, setCo2SavedDelivery] = useState(0.34);
 
-  // Payment Simulation Modal State
+  // Payment Modal & Live Paymenku State
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymenkuData, setPaymenkuData] = useState<any>(null);
+  const [isPaymenkuLoading, setIsPaymenkuLoading] = useState(false);
+  const [paymenkuError, setPaymenkuError] = useState<string | null>(null);
+  const [activeOrderNumber, setActiveOrderNumber] = useState("");
 
   const couriers = [
     {
@@ -120,11 +124,48 @@ export default function CheckoutPage() {
 
   const [createdOrderNumber, setCreatedOrderNumber] = useState("JH-20261029-0001");
 
+  const handleInitiatePayment = async () => {
+    if (items.length === 0) return;
+
+    const generatedOrderNumber = `JH-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(1000 + Math.random() * 9000)}`;
+    setActiveOrderNumber(generatedOrderNumber);
+    setIsPaymentModalOpen(true);
+    setIsPaymenkuLoading(true);
+    setPaymenkuError(null);
+    setPaymenkuData(null);
+
+    try {
+      const res = await fetch("/api/payment/paymenku/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderNumber: generatedOrderNumber,
+          amount: grandTotal,
+          customerName: recipient || (user ? user.name : "Pelanggan"),
+          customerEmail: user ? user.email : "pelanggan@jejakhijau.id",
+          customerPhone: phone || (user ? user.phone : "081234567890"),
+          paymentMethod: paymentMethod === "va" ? "bca_va" : "qris",
+        }),
+      });
+
+      const json = await res.json();
+      if (res.ok && json.success && json.data) {
+        setPaymenkuData(json.data);
+      } else {
+        setPaymenkuError(json?.error || "Gagal membuat transaksi ke server Paymenku.");
+      }
+    } catch (err: any) {
+      setPaymenkuError(err?.message || "Koneksi ke gerbang Paymenku terputus.");
+    } finally {
+      setIsPaymenkuLoading(false);
+    }
+  };
+
   const handleCreateOrder = async () => {
     if (items.length === 0) return;
     setIsProcessing(true);
 
-    const generatedOrderNumber = `JH-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const generatedOrderNumber = activeOrderNumber || `JH-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(1000 + Math.random() * 9000)}`;
     const localOrder = {
       id: `ord-${Date.now()}`,
       orderNumber: generatedOrderNumber,
@@ -174,7 +215,7 @@ export default function CheckoutPage() {
           courier: currentCourier.name,
           isGreenDelivery: currentCourier.isGreen,
           plasticFreePack: usePlasticFree,
-          paymentMethod: paymentMethod === "qris" ? "QRIS Standar" : "Virtual Account BCA",
+          paymentMethod: paymentMethod === "qris" ? "QRIS Paymenku" : "Virtual Account Paymenku",
           pointsUsed: usePoints ? 500 : 0,
           items: items.map((i) => ({
             productId: i.product.id,
@@ -216,16 +257,16 @@ export default function CheckoutPage() {
               <CheckCircle2 className="h-8 w-8" strokeWidth={1.75} />
             </div>
 
-            <span className="inline-block rounded-sm bg-[var(--secondary)] px-2.5 py-0.5 text-xs font-semibold text-[var(--foreground)] border border-[var(--border)]">
-              Pembayaran Terverifikasi (Midtrans Sandbox Simulator)
+            <span className="inline-block rounded-sm bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              Pembayaran Terverifikasi Resmi Paymenku
             </span>
 
             <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">
-              Pesanan Anda Berhasil Disimpan ke Database
+              Pesanan Anda Berhasil Dikonfirmasi
             </h1>
 
             <p className="text-xs sm:text-sm text-[var(--muted-foreground)] leading-relaxed">
-              Nomor Pesanan: <strong className="text-[var(--foreground)] font-mono">{createdOrderNumber}</strong>. Pesanan ini tersimpan di server lokal, menghemat estimasi <strong>{impact.co2Kg} kg CO₂</strong> dan memberikan <strong>+{earnedPoints} Eco Points</strong>.
+              Nomor Pesanan: <strong className="text-[var(--foreground)] font-mono">{createdOrderNumber}</strong>. Transaksi telah sukses terverifikasi secara langsung via Paymenku Payment Gateway, menghemat estimasi <strong>{impact.co2Kg} kg CO₂</strong> dan memberikan <strong>+{earnedPoints} Eco Points</strong>.
             </p>
 
             <div className="pt-4 flex flex-col sm:flex-row gap-2.5 justify-center">
@@ -467,10 +508,10 @@ export default function CheckoutPage() {
                   <span className="flex h-5 w-5 items-center justify-center rounded-sm bg-[var(--primary)] text-[var(--primary-foreground)] text-xs">
                     3
                   </span>
-                  Metode Pembayaran (Midtrans Sandbox)
+                  Metode Pembayaran (Gerbang Paymenku)
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("qris")}
@@ -481,8 +522,8 @@ export default function CheckoutPage() {
                     }`}
                   >
                     <QrCode className="h-5 w-5 mb-1 text-[var(--primary)]" strokeWidth={1.75} />
-                    <span className="text-xs font-bold text-[var(--foreground)]">QRIS Instant</span>
-                    <span className="text-[10px] text-[var(--muted-foreground)]">GoPay, OVO, ShopeePay</span>
+                    <span className="text-xs font-bold text-[var(--foreground)]">QRIS Otomatis (Paymenku)</span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">GoPay, OVO, ShopeePay, BCA, Mandiri</span>
                   </button>
 
                   <button
@@ -495,22 +536,8 @@ export default function CheckoutPage() {
                     }`}
                   >
                     <Building2 className="h-5 w-5 mb-1 text-[var(--primary)]" strokeWidth={1.75} />
-                    <span className="text-xs font-bold text-[var(--foreground)]">Virtual Account</span>
-                    <span className="text-[10px] text-[var(--muted-foreground)]">BCA, Mandiri, BRI</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("cc")}
-                    className={`flex flex-col items-center justify-center rounded-md border p-3.5 text-center transition-colors cursor-pointer ${
-                      paymentMethod === "cc"
-                        ? "border-[var(--primary)] bg-[var(--secondary)] text-[var(--foreground)] font-semibold"
-                        : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:bg-[var(--secondary)]/40"
-                    }`}
-                  >
-                    <CreditCard className="h-5 w-5 mb-1 text-[var(--primary)]" strokeWidth={1.75} />
-                    <span className="text-xs font-bold text-[var(--foreground)]">Kartu Debit/Kredit</span>
-                    <span className="text-[10px] text-[var(--muted-foreground)]">Visa, Mastercard</span>
+                    <span className="text-xs font-bold text-[var(--foreground)]">Virtual Account (Paymenku)</span>
+                    <span className="text-[10px] text-[var(--muted-foreground)]">BCA, Mandiri, BRI, BNI</span>
                   </button>
                 </div>
               </div>
@@ -619,7 +646,7 @@ export default function CheckoutPage() {
 
                 <button
                   type="button"
-                  onClick={() => setIsPaymentModalOpen(true)}
+                  onClick={handleInitiatePayment}
                   disabled={items.length === 0}
                   className="flex w-full h-11 items-center justify-center gap-2 rounded-md bg-[var(--primary)] text-xs sm:text-sm font-semibold text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90 transition-colors disabled:opacity-40"
                 >
@@ -646,12 +673,16 @@ export default function CheckoutPage() {
           }}
         />
 
-        {/* Payment Simulation Modal (QRIS / VA) */}
+        {/* Live Paymenku Payment Modal */}
         <PaymentSimulationModal
           isOpen={isPaymentModalOpen}
           onClose={() => setIsPaymentModalOpen(false)}
           amount={grandTotal}
           paymentMethod={paymentMethod}
+          orderNumber={activeOrderNumber}
+          paymenkuData={paymenkuData}
+          isLoading={isPaymenkuLoading}
+          errorMessage={paymenkuError}
           onConfirmSuccess={handleCreateOrder}
         />
       </main>

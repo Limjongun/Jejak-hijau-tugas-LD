@@ -4,9 +4,9 @@ export interface PaymenkuPaymentRequest {
   orderNumber: string;
   amount: number;
   customerName: string;
-  customerEmail: string;
+  customerEmail?: string;
   customerPhone?: string;
-  paymentMethod?: "QRIS" | "VA_BCA" | "VA_MANDIRI" | "VA_BNI" | "EWALLET";
+  paymentMethod?: string;
 }
 
 export interface PaymenkuPaymentResponse {
@@ -15,11 +15,13 @@ export interface PaymenkuPaymentResponse {
   orderNumber: string;
   amount: number;
   paymentMethod: string;
+  status: "PENDING" | "PAID" | "EXPIRED" | "FAILED";
+  payUrl?: string;
   qrisPayload?: string;
   qrisImageUrl?: string;
   vaNumber?: string;
+  merchantName?: string;
   expiredAt: string;
-  status: "PENDING" | "PAID" | "EXPIRED" | "FAILED";
   message: string;
 }
 
@@ -27,7 +29,7 @@ export function getPaymenkuConfig() {
   let merchantCode = process.env.PAYMENKU_MERCHANT_CODE || "Jejak-hijau";
   let apiKey = process.env.PAYMENKU_API_KEY || "";
   let secretKey = process.env.PAYMENKU_SECRET_KEY || "";
-  let baseUrl = process.env.PAYMENKU_BASE_URL || "https://api.paymenku.com/v1";
+  let baseUrl = process.env.PAYMENKU_BASE_URL || "https://paymenku.com/api/v1";
   let callbackUrl = process.env.PAYMENKU_CALLBACK_URL || "https://jejakhijau.web.id/api/payment/paymenku/webhook";
   let returnUrl = process.env.PAYMENKU_RETURN_URL || "https://jejakhijau.web.id/orders";
 
@@ -49,109 +51,137 @@ export function getPaymenkuConfig() {
 }
 
 /**
- * Generate signature for Paymenku API request
- * Hash SHA256 of merchant_code + order_id + amount + secret_key
- */
-export function generatePaymenkuSignature(
-  merchantCode: string,
-  orderNumber: string,
-  amount: number,
-  secretKey: string
-): string {
-  const rawString = `${merchantCode}:${orderNumber}:${amount}:${secretKey}`;
-  return crypto.createHash("sha256").update(rawString).digest("hex");
-}
-
-/**
  * Verify incoming webhook signature from Paymenku
+ * Header X-PaymenKu-Signature: HMAC-SHA256(timestamp + "." + raw_body, webhook_secret)
  */
-export function verifyPaymenkuSignature(
-  incomingSignature: string,
-  orderNumber: string,
-  amount: number
+export function verifyPaymenkuWebhookSignature(
+  signature: string,
+  timestamp: string,
+  rawBody: string,
+  secretKey?: string
 ): boolean {
-  if (!incomingSignature) return false;
+  if (!signature || !timestamp) return false;
   const cfg = getPaymenkuConfig();
-  const expectedSignature = generatePaymenkuSignature(
-    cfg.merchantCode,
-    orderNumber,
-    amount,
-    cfg.secretKey
-  );
-  return incomingSignature.toLowerCase() === expectedSignature.toLowerCase();
+  const secret = secretKey || cfg.secretKey;
+  if (!secret) return false;
+
+  try {
+    const expected = crypto
+      .createHmac("sha256", secret)
+      .update(`${timestamp}.${rawBody}`)
+      .digest("hex");
+    return expected.toLowerCase() === signature.toLowerCase();
+  } catch (err) {
+    console.error("Signature verification error:", err);
+    return false;
+  }
 }
 
 /**
- * Create a new Payment Transaction via Paymenku
+ * Helper to map user payment selection to Paymenku channel_code
+ */
+export function mapToPaymenkuChannel(method?: string): string {
+  if (!method) return "qris";
+  const m = method.toLowerCase();
+  if (m.includes("qris")) return "qris";
+  if (m.includes("bca")) return "bca_va";
+  if (m.includes("bri")) return "bri_va";
+  if (m.includes("bni")) return "bni_va";
+  if (m.includes("mandiri")) return "mandiri_va";
+  if (m.includes("cimb")) return "cimb_va";
+  if (m.includes("permata")) return "permata_va";
+  if (m.includes("bsi")) return "bsi_va";
+  if (m.includes("dana")) return "dana";
+  if (m.includes("ovo")) return "ovo";
+  if (m.includes("shopee")) return "shopeepay";
+  if (m.includes("linkaja")) return "linkaja";
+  return "qris";
+}
+
+/**
+ * Create a live Payment Transaction via Paymenku API
  */
 export async function createPaymenkuTransaction(
   req: PaymenkuPaymentRequest
 ): Promise<PaymenkuPaymentResponse> {
   const cfg = getPaymenkuConfig();
-  const signature = generatePaymenkuSignature(
-    cfg.merchantCode,
-    req.orderNumber,
-    req.amount,
-    cfg.secretKey
-  );
+  const channelCode = mapToPaymenkuChannel(req.paymentMethod);
 
-  const payload = {
-    merchant_code: cfg.merchantCode,
-    order_id: req.orderNumber,
-    amount: req.amount,
-    method: req.paymentMethod || "QRIS",
-    customer_name: req.customerName,
-    customer_email: req.customerEmail,
-    customer_phone: req.customerPhone || "081234567890",
-    callback_url: cfg.callbackUrl,
-    return_url: `${cfg.returnUrl}/${req.orderNumber}`,
-    signature,
-  };
-
-  try {
-    // If running in live environment with valid API key
-    if (cfg.apiKey && cfg.secretKey) {
-      const response = await fetch(`${cfg.baseUrl}/transactions/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${cfg.apiKey}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          success: true,
-          transactionId: data.transaction_id || `pmk-${Date.now()}`,
-          orderNumber: req.orderNumber,
-          amount: req.amount,
-          paymentMethod: req.paymentMethod || "QRIS",
-          qrisPayload: data.qris_payload,
-          qrisImageUrl: data.qris_image_url,
-          vaNumber: data.va_number,
-          expiredAt: data.expired_at || new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-          status: "PENDING",
-          message: "Transaksi Paymenku berhasil dibuat",
-        };
-      }
-    }
-  } catch (error) {
-    console.warn("Paymenku API endpoint not yet connected, using instant high-security gateway fallback:", error);
+  if (!cfg.apiKey) {
+    throw new Error("Kunci API Paymenku (PAYMENKU_API_KEY) belum dikonfigurasi di environment.");
   }
 
-  // High-reliability gateway fallback for local host & testing
+  const payload = {
+    channel_code: channelCode,
+    amount: Math.round(req.amount),
+    reference_id: req.orderNumber,
+    customer_name: req.customerName || "Pelanggan JejakHijau",
+    customer_email: req.customerEmail || "pelanggan@jejakhijau.id",
+    customer_phone: req.customerPhone || "081234567890",
+    return_url: `${cfg.returnUrl}/${req.orderNumber}`,
+  };
+
+  const response = await fetch(`${cfg.baseUrl}/transaction/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${cfg.apiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const resJson: any = await response.json();
+
+  if (!response.ok || resJson.status !== "success" || !resJson.data) {
+    const errorMsg =
+      resJson?.message ||
+      (resJson?.errors ? JSON.stringify(resJson.errors) : `HTTP ${response.status} Gagal membuat transaksi`);
+    throw new Error(`Paymenku Error: ${errorMsg}`);
+  }
+
+  const data = resJson.data;
+  const paymentInfo = data.payment_info || {};
+
   return {
     success: true,
-    transactionId: `pmk-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`,
-    orderNumber: req.orderNumber,
-    amount: req.amount,
-    paymentMethod: req.paymentMethod || "QRIS",
-    qrisPayload: `00020101021226670014ID.PAYMENKU.WWW01189360091100202619085204541153033605802ID5926PT JEJAK HIJAU NUSANTARA6007BANDUNG61054013562210717${req.orderNumber}6304E8A9`,
-    vaNumber: "8277 0812 3456 7890",
-    expiredAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-    status: "PENDING",
-    message: "Gerbang Paymenku QRIS Siap",
+    transactionId: data.trx_id,
+    orderNumber: data.reference_id || req.orderNumber,
+    amount: parseFloat(data.amount || req.amount),
+    paymentMethod: channelCode,
+    status: (data.status?.toUpperCase() as any) || "PENDING",
+    payUrl: data.pay_url,
+    qrisPayload: paymentInfo.qr_string,
+    qrisImageUrl: paymentInfo.qr_url,
+    vaNumber: paymentInfo.va_number,
+    merchantName: paymentInfo.merchant_name || "Paymenku",
+    expiredAt:
+      paymentInfo.expiration_date ||
+      new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    message: "Transaksi Paymenku berhasil dibuat",
   };
+}
+
+/**
+ * Check live status of a transaction from Paymenku API
+ */
+export async function checkPaymenkuTransactionStatus(trxIdOrRefId: string) {
+  const cfg = getPaymenkuConfig();
+  if (!cfg.apiKey) {
+    throw new Error("Kunci API Paymenku belum dikonfigurasi.");
+  }
+
+  const response = await fetch(`${cfg.baseUrl}/check-status/${encodeURIComponent(trxIdOrRefId)}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${cfg.apiKey}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const resJson: any = await response.json();
+  if (!response.ok || resJson.status !== "success" || !resJson.data) {
+    throw new Error(resJson?.message || `Gagal memeriksa status: HTTP ${response.status}`);
+  }
+
+  return resJson.data;
 }
