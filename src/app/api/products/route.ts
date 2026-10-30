@@ -102,12 +102,12 @@ export async function GET(request: NextRequest) {
   }
 
   // Graceful fallback for serverless edge
-  const { searchParams } = new URL(request.url);
-  const categorySlug = searchParams.get("category");
+  const urlObj = new URL(request.url);
+  const fallbackCat = urlObj.searchParams.get("category");
   let fallback = [...PRODUCTS];
 
-  if (categorySlug && categorySlug !== "all") {
-    const cat = CATEGORIES.find((c) => c.slug === categorySlug);
+  if (fallbackCat && fallbackCat !== "all") {
+    const cat = CATEGORIES.find((c) => c.slug === fallbackCat);
     if (cat) {
       fallback = fallback.filter((p) => p.categoryId === cat.id);
     }
