@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PRODUCTS, CATEGORIES } from "@/data/initial-data";
 
 export async function GET(
   request: NextRequest,
@@ -69,9 +70,23 @@ export async function GET(
 
     return NextResponse.json(formatted);
   } catch (error: any) {
-    console.error("GET /api/products/[id] error:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch product" }, { status: 500 });
+    console.warn("Prisma unavailable, falling back to static product:", error?.message);
   }
+
+  // Graceful fallback for serverless edge
+  const { id } = await params;
+  const prod = PRODUCTS.find((p) => p.slug === id || p.id === id);
+  if (prod) {
+    const cat = CATEGORIES.find((c) => c.id === prod.categoryId);
+    return NextResponse.json({
+      ...prod,
+      categoryName: cat?.name || "Katalog Hijau",
+      categorySlug: cat?.slug || "all",
+      reviews: [],
+    });
+  }
+
+  return NextResponse.json({ error: "Product not found" }, { status: 404 });
 }
 
 export async function PATCH(

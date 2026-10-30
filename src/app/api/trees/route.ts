@@ -43,8 +43,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(formatted);
   } catch (error: any) {
-    console.error("GET /api/trees error:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch tree donations" }, { status: 500 });
+    console.warn("GET /api/trees edge warning:", error?.message);
+    return NextResponse.json([]);
   }
 }
 

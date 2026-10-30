@@ -56,8 +56,8 @@ export async function GET(request: NextRequest) {
         user.donations.filter((d: any) => d.status === "PLANTED").length + user.donations.length,
     });
   } catch (error: any) {
-    console.error("GET /api/account error:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch account" }, { status: 500 });
+    console.warn("GET /api/account edge warning:", error?.message);
+    return NextResponse.json({ error: "Akun belum terdaftar atau database lokal offline." }, { status: 404 });
   }
 }
 

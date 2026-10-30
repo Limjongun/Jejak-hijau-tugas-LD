@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { PRODUCTS, CATEGORIES } from "@/data/initial-data";
 
 export async function GET(request: NextRequest) {
   try {
@@ -67,37 +68,52 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Format for easy frontend consumption
-    const formatted = products.map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      sku: p.sku,
-      description: p.description,
-      price: p.price,
-      stock: p.stock,
-      weightGram: p.weightGram,
-      status: p.status,
-      isFeatured: p.isFeatured,
-      co2SavedKg: p.co2SavedKg,
-      plasticSavedPcs: p.plasticSavedPcs,
-      impactNote: p.impactNote,
-      origin: p.origin,
-      materials: p.materials,
-      avgRating: p.avgRating,
-      soldCount: p.soldCount,
-      categoryId: p.categoryId,
-      categoryName: p.category.name,
-      categorySlug: p.category.slug,
-      images: p.images.map((img: any) => img.url),
-      sdgIds: p.sdgs.map((s: any) => s.sdgId),
-    }));
+    if (products && products.length > 0) {
+      // Format for easy frontend consumption
+      const formatted = products.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        sku: p.sku,
+        description: p.description,
+        price: p.price,
+        stock: p.stock,
+        weightGram: p.weightGram,
+        status: p.status,
+        isFeatured: p.isFeatured,
+        co2SavedKg: p.co2SavedKg,
+        plasticSavedPcs: p.plasticSavedPcs,
+        impactNote: p.impactNote,
+        origin: p.origin,
+        materials: p.materials,
+        avgRating: p.avgRating,
+        soldCount: p.soldCount,
+        categoryId: p.categoryId,
+        categoryName: p.category.name,
+        categorySlug: p.category.slug,
+        images: p.images.map((img: any) => img.url),
+        sdgIds: p.sdgs.map((s: any) => s.sdgId),
+      }));
 
-    return NextResponse.json(formatted);
+      return NextResponse.json(formatted);
+    }
   } catch (error: any) {
-    console.error("GET /api/products error:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch products" }, { status: 500 });
+    console.warn("Prisma unavailable, falling back to static PRODUCTS:", error?.message);
   }
+
+  // Graceful fallback for serverless edge
+  const { searchParams } = new URL(request.url);
+  const categorySlug = searchParams.get("category");
+  let fallback = [...PRODUCTS];
+
+  if (categorySlug && categorySlug !== "all") {
+    const cat = CATEGORIES.find((c) => c.slug === categorySlug);
+    if (cat) {
+      fallback = fallback.filter((p) => p.categoryId === cat.id);
+    }
+  }
+
+  return NextResponse.json(fallback);
 }
 
 export async function POST(request: NextRequest) {

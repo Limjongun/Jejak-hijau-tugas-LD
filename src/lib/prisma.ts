@@ -5,15 +5,20 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-function makePrismaClient() {
-  const dbUrl = process.env.DATABASE_URL || "file:dev.db";
-  const adapter = new PrismaLibSql({
-    url: dbUrl,
-  });
+function makePrismaClient(): PrismaClient {
+  try {
+    const dbUrl = process.env.DATABASE_URL || "file:dev.db";
+    const adapter = new PrismaLibSql({
+      url: dbUrl,
+    });
 
-  return new PrismaClient({
-    adapter,
-  });
+    return new PrismaClient({
+      adapter,
+    });
+  } catch (err) {
+    console.warn("PrismaLibSql initialization caught:", err);
+    return new PrismaClient();
+  }
 }
 
 export const prisma = globalForPrisma.prisma ?? makePrismaClient();
